@@ -18,6 +18,22 @@ app.use(express.static(path.join(__dirname, 'public/page')));
 app.use(express.static(path.join(__dirname, 'public/images/')));
 app.use(express.static('public'));
 
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/page/index.html');
+});
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/images/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + file.originalname;
+    cb(null, uniqueSuffix);
+  }
+});
+
+const upload = multer({ storage: storage });
+
 // Kết nối MongoDB
 const connectDB = async () => {
   try {
@@ -110,6 +126,39 @@ app.get('/dssanpham/json', async (req, res) => {
   }
 });
 
+app.post('/updateSanPham/:id', upload.single('hinhanh'), async (req, res) => {
+  const { id } = req.params;
+  const { tensanpham, loaisanpham } = req.body;
+  
+  try {
+      await client.connect();
+      const db = client.db(dbName);
+      const collection = db.collection(collectionName);
+
+      const sanpham = await collection.findOne({ id: id });
+
+      if (!sanpham) {
+          return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+      }
+
+      const updatedData = {
+          tensanpham,
+          loaisanpham,
+      };
+
+      if (req.file) {
+          updatedData.hinhanh = req.file.filename;
+      }
+
+      await collection.updateOne({ id: id }, { $set: updatedData });
+
+      res.json({ message: "Cập nhật thành công!" });
+  } catch (error) {
+      console.error('Lỗi khi cập nhật sản phẩm trong MongoDB:', error);
+      res.status(500).json({ message: "Lỗi hệ thống" });
+  }
+});
+
 // API xóa 1 sản phẩm theo ID
 app.delete('/dssanpham/:id', async (req, res) => {
   const productId = req.params.id;
@@ -127,6 +176,7 @@ app.delete('/dssanpham/:id', async (req, res) => {
     res.status(500).send('Lỗi hệ thống');
   }
 });
+
 
 // API xóa tất cả sản phẩm
 app.delete('/dssanpham', async (req, res) => {
