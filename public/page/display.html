@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/display.css">
+    <title>Danh Sách Sản Phẩm</title>
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="/">LOGO</a></div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Quản lý sản phẩm</h2>
+            <ul>
+                <li><a href="/add.html">Thêm sản phẩm</a></li>
+                <li><a href="/display.html">Danh sách sản phẩm</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h2>Danh sách sản phẩm</h2>
+            <div class="filter-section">
+                <div class="filter-left">
+                  <select id="categoryFilter">
+                    <option value="">Chọn loại sản phẩm</option>
+                  </select>
+                  <select id="trademarkFilter">
+                    <option value="">Chọn thương hiệu</option>
+                  </select>
+                  <select id="priceFilter">
+                    <option value="">Chọn mức giá</option>
+                  </select>
+                  <button id="Filter">Lọc</button>
+                  <button id="resetFilter">Đặt lại</button>
+                </div>
+                <div class="filter-right">
+                  <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm...">
+                  <button id="searchButton">Tìm kiếm</button>
+                </div>
+              </div>
+              <script>
+              fetch('/dssanpham')
+                .then(response => response.json())
+                .then(data => {
+                  fullData = data;          
+                  const categorySet = new Set();
+                  const trademarkSet = new Set();
+                  data.forEach(sp => {
+                    if (sp.loaisanpham) categorySet.add(sp.loaisanpham);
+                    if (sp.thuonghieu) trademarkSet.add(sp.thuonghieu);
+                  });
+                  const categoryFilter = document.getElementById('categoryFilter');
+                  categorySet.forEach(loai => {
+                    const option = document.createElement('option');
+                    option.value = loai;
+                    option.textContent = loai;
+                    categoryFilter.appendChild(option);
+                  });
+                  const trademarkFilter = document.getElementById('trademarkFilter');
+                  trademarkSet.forEach(hieu => {
+                    const option = document.createElement('option');
+                    option.value = hieu;
+                    option.textContent = hieu;
+                    trademarkFilter.appendChild(option);
+                  });
+                  const priceFilter = document.getElementById('priceFilter');
+                  priceFilter.innerHTML = `
+                    <option value="">Chọn mức giá</option>
+                    <option value="0-500000">Dưới 500.000đ</option>
+                    <option value="500000-1000000">500.000đ - 1.000.000đ</option>
+                    <option value="1000000-2000000">1.000.000đ - 2.000.000đ</option>
+                    <option value="2000000+">Trên 2.000.000đ</option>
+                  `;
+                })              
+              </script>
+            <table id="SanPhamTable">
+                <thead>
+                  <tr>
+                    <th>Mã sản phẩm</th>
+                    <th>Loại sản phẩm</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Khuyến mãi</th>
+                    <th>Giá</th>
+                    <th>Ảnh</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+              <div id="pagination" style="margin-top: 20px; text-align: center;"></div>
+              <button id="deleteAllBtn" style="margin-top: 20px; background-color: red; color: white; border: none; padding: 10px; cursor: pointer;">
+                Xóa tất cả sản phẩm
+            </button>
+            <script>
+              const itemsPerPage = 10;
+              let currentPage = 1;
+              let fullData = [];
+              
+              function renderTable(data) {
+                const tableBody = document.querySelector('#SanPhamTable tbody');
+                tableBody.innerHTML = '';
+              
+                data.forEach(sp => {
+                  const row = document.createElement('tr');
+                  row.innerHTML = `
+                    <td>${sp.id || ''}</td>
+                    <td>${sp.loaisanpham || ''}</td>
+                    <td>${sp.tensanpham || ''}</td>
+                    <td>${sp.thuonghieu || ''}</td>
+                    <td>${sp.khuyenmai || ''}</td>
+                    <td>${sp.giasanpham?.toLocaleString('vi-VN') + ' ₫' || ''}</td>
+                    <td><img src="/images/${sp.hinhanh}" alt="${sp.tensanpham}" width="80"></td>
+                    <td>
+                      <button onclick="xemChiTiet('${sp.id}')">Chi tiết</button>
+                      <button onclick="suaSanPham('${sp.id}')">Sửa</button>
+                      <button onclick="xoaSanPham('${sp.id}')">Xóa</button>
+                    </td>`;
+                  tableBody.appendChild(row);
+                });
+              }
+              
+              function renderPagination(totalItems) {
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                const pagination = document.getElementById('pagination');
+                pagination.innerHTML = '';
+              
+                for (let i = 1; i <= totalPages; i++) {
+                  const btn = document.createElement('button');
+                  btn.textContent = i;
+                  btn.style.margin = '0 5px';
+                  btn.style.padding = '5px 10px';
+                  btn.style.border = '1px solid #ccc';
+                  btn.style.cursor = 'pointer';
+                  btn.style.backgroundColor = (i === currentPage) ? '#007bff' : 'white';
+                  btn.style.color = (i === currentPage) ? 'white' : 'black';
+              
+                  btn.onclick = () => {
+                    currentPage = i;
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    renderTable(fullData.slice(start, end));
+                    renderPagination(fullData.length);
+                  };
+              
+                  pagination.appendChild(btn);
+                }
+              }
+              
+              function fetchAllProducts() {
+                fetch('/dssanpham')
+                  .then(res => res.json())
+                  .then(data => {
+                    fullData = data;
+                    currentPage = 1;
+                    renderTable(fullData.slice(0, itemsPerPage));
+                    renderPagination(fullData.length);
+                  })
+                  .catch(err => {
+                    console.error("Lỗi khi tải sản phẩm:", err);
+                  });
+              }
+              
+              function fetchFilteredProducts() {
+                const category = document.getElementById('categoryFilter').value;
+                const trademark = document.getElementById('trademarkFilter').value;
+                const price = document.getElementById('priceFilter').value;
+              
+                const params = new URLSearchParams({ category, trademark, price });
+              
+                fetch(`/api/sanpham/filter?${params.toString()}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    fullData = data;
+                    currentPage = 1;
+                    renderTable(fullData.slice(0, itemsPerPage));
+                    renderPagination(fullData.length);
+                  })
+                  .catch(err => console.error("Lỗi khi lọc sản phẩm:", err));
+              }
+              
+              function fetchSearchResults() {
+                const keyword = document.getElementById('searchInput').value;
+                const params = new URLSearchParams({ keyword });
+              
+                fetch(`/api/sanpham/search?${params.toString()}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    fullData = data;
+                    currentPage = 1;
+                    renderTable(fullData.slice(0, itemsPerPage));
+                    renderPagination(fullData.length);
+                  })
+                  .catch(err => console.error("Lỗi khi tìm kiếm:", err));
+              }
+              
+              // Gắn sự kiện cho các nút
+              
+              document.getElementById('Filter').addEventListener('click', fetchFilteredProducts);
+              document.getElementById('searchButton').addEventListener('click', fetchSearchResults);
+              document.getElementById('resetFilter').addEventListener('click', () => {
+                document.getElementById('categoryFilter').value = '';
+                document.getElementById('trademarkFilter').value = '';
+                document.getElementById('priceFilter').value = '';
+                document.getElementById('searchInput').value = '';
+                fetchAllProducts();
+              });
+              
+              // Hiển thị sản phẩm ban đầu
+              fetchAllProducts();
+              </script>            
+        </main>
+    </div>
+</body>
+</html>

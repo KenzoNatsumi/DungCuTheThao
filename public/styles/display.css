@@ -1,0 +1,251 @@
+/* Reset mặc định */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Header */
+header {
+    background: #2C3E50;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 20px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.logo a {
+    text-decoration: none;
+    color: white;
+}
+
+/* Layout chính */
+.container {
+    display: flex;
+    margin-top: 60px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #2C3E50;
+    color: white;
+    padding-top: 20px;
+    position: fixed;
+    left: 0;
+    top: 50px;
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+.sidebar h2 {
+    text-align: center;
+    padding-bottom: 20px;
+    font-size: 30px;
+    border-bottom: 1px solid black;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    border-bottom: 1px solid black;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    padding: 20px 20px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+    background: #1A252F;
+    border-radius: 5px;
+}
+
+/* Nội dung chính */
+.content {
+    margin-left: 270px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 270px);
+}
+
+.content h2 {
+    margin-bottom: 20px;
+}
+
+
+/* Bảng */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+   
+    overflow: hidden;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+table th {
+    background: #f4f4f4;
+    color: red;
+    border: solid 2px black;
+    padding: 12px;
+}
+
+table td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center; 
+}
+
+/* Hình ảnh trong bảng */
+table img {
+    width: 100px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 5px;
+}
+
+/* Thanh tìm kiếm */
+.search-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Căn phải */
+    margin-bottom: 20px; /* Khoảng cách với phần dưới */
+}
+
+.search-container label {
+    margin-right: 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.search-container input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px; /* Định kích thước cho ô input */
+}
+
+/* Căn chỉnh phần bộ lọc */
+.filter-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Chia hai bên */
+    margin-bottom: 20px;
+    border: 2px solid #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.filter-left {
+    display: flex;
+    gap: 10px; /* Khoảng cách giữa các thành phần bên trái */
+}
+
+.filter-right {
+    display: flex;
+    gap: 10px; /* Khoảng cách giữa ô input và nút tìm kiếm */
+}
+
+.filter-section select,
+.filter-section input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Nút chung */
+.filter-section button,
+#searchButton {
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+/* Nút Reset */
+#resetFilter {
+    background-color: #ff0000;
+    color: white;
+}
+#Filter {
+    background-color: #007bff;
+    color: white;
+}
+
+#resetFilter:hover {
+    background-color: #0056b3;
+}
+
+/* Nút Tìm kiếm */
+#searchButton {
+    background-color: #28a745;
+    color: white;
+}
+
+#searchButton:hover {
+    background-color: #218838;
+}
+
+table td button {
+    display: block;
+    width: 65px;           
+    margin: 3px auto;       
+    padding: 4px 6px;      
+    font-size: 12px;       
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  
+  /* Chi tiết */
+  table td button:nth-child(1) {
+    background-color: #17a2b8;
+    color: white;
+  }
+  table td button:nth-child(1):hover {
+    background-color: #138496;
+  }
+  
+  /* Sửa */
+  table td button:nth-child(2) {
+    background-color: #ffc107;
+    color: black;
+  }
+  table td button:nth-child(2):hover {
+    background-color: #e0a800;
+  }
+  
+  /* Xóa */
+  table td button:nth-child(3) {
+    background-color: #dc3545;
+    color: white;
+  }
+  table td button:nth-child(3):hover {
+    background-color: #c82333;
+  }
+  
