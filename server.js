@@ -161,6 +161,8 @@ app.put('/capnhat/:id', upload.single('hinhanh'), async (req, res) => {
   }
 });
 
+
+//API xoá sản phẩm theo id
 app.delete('/dssanpham/:id', async (req, res) => {
   const productId = req.params.id;
 
@@ -174,7 +176,7 @@ app.delete('/dssanpham/:id', async (req, res) => {
       res.status(404).send(`Sản phẩm với ID = ${productId} không tồn tại.`);
     }
   } catch (error) {
-    console.error('❌ Lỗi khi xóa sản phẩm:', error);
+    console.error('Lỗi khi xóa sản phẩm:', error);
     res.status(500).send('Lỗi máy chủ');
   }
 });
