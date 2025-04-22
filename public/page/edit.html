@@ -1,103 +1,62 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉnh sửa sản phẩm</title>
-    <link rel="stylesheet" href="../styles/edit.css">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../styles/edit.css">
+  <title>Cập nhật sản phẩm</title>
 </head>
 <body>
-    <header>
-        <div class="logo"><a href="/">LOGO</a></div>
-    </header>
+  <h2>Cập nhật sản phẩm</h2>
+  <form id="editForm" enctype="multipart/form-data">
+    <input type="hidden" id="id" name="id">
+    <label>Tên sản phẩm: <input type="text" id="tensanpham" name="tensanpham"></label><br>
+    <label>Loại sản phẩm: <input type="text" id="loaisanpham" name="loaisanpham"></label><br>
+    <label>Thương hiệu: <input type="text" id="thuonghieu" name="thuonghieu"></label><br>
+    <label>Giá sản phẩm: <input type="number" id="giasanpham" name="giasanpham"></label><br>
+    <label>Khuyến mãi: <input type="text" id="khuyenmai" name="khuyenmai"></label><br>
+    <label>Mô tả: <textarea id="mota" name="mota"></textarea></label><br>
+    <label>Bảng size (ngăn cách bằng dấu phẩy): <input type="text" id="bangsize" name="bangsize"></label><br>
+    <label>Hình ảnh mới (nếu có): <input type="file" name="hinhanh"></label><br><br>
+    <button type="submit">Cập nhật</button>
+  </form>
 
-    <div class="container">
-        <aside class="sidebar">
-            <h2>Quản lý sản phẩm</h2>
-            <ul>
-                <li><a href="/add.html">Thêm sản phẩm</a></li>
-                <li><a href="/display.html">Danh sách sản phẩm</a></li>
-            </ul>
-        </aside>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
 
-        <main class="content">
-            <h2>Cập nhật sản phẩm</h2>
-            <form id="editForm" enctype="multipart/form-data">
-                <label for="editId">Mã sản phẩm:</label>
-                <input type="text" id="editId" disabled>
+    fetch(`/getSanPham/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('id').value = data.id;
+        document.getElementById('tensanpham').value = data.tensanpham;
+        document.getElementById('loaisanpham').value = data.loaisanpham;
+        document.getElementById('thuonghieu').value = data.thuonghieu;
+        document.getElementById('giasanpham').value = data.giasanpham;
+        document.getElementById('khuyenmai').value = data.khuyenmai;
+        document.getElementById('mota').value = data.mota;
+        document.getElementById('bangsize').value = data.bangsize.join(', ');
+      });
 
-                <label for="editName">Tên sản phẩm:</label>
-                <input type="text" id="editName" required>
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const bangsize = formData.get('bangsize').split(',').map(s => s.trim());
+      formData.set('bangsize', bangsize);
 
-                <label for="editCategory">Loại sản phẩm:</label>
-                <input type="text" id="editCategory" required>
-                
-                <label for="editImage">Hình ảnh:</label>
-                <input type="file" id="editImage" accept="image/*">
-
-                <button type="submit">Lưu</button>
-            </form>
-        </main>
-    </div>
-
-    <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get("id");
-
-    if (!productId) {
-        alert("Không tìm thấy sản phẩm!");
-        window.location.href = "display.html";
-    }
-
-    // Load dữ liệu sản phẩm từ MongoDB
-    document.addEventListener("DOMContentLoaded", () => {
-        fetch(`/api/sanpham/${productId}`)
-            .then(response => {
-                if (!response.ok) throw new Error("Không tìm thấy sản phẩm");
-                return response.json();
-            })
-            .then(sanpham => {
-                document.getElementById("editId").value = sanpham._id;
-                document.getElementById("editName").value = sanpham.tensanpham;
-                document.getElementById("editCategory").value = sanpham.loaisanpham;
-            })
-            .catch(error => {
-                console.error("Lỗi khi tải sản phẩm:", error);
-                alert("Lỗi khi tải sản phẩm");
-                window.location.href = "display.html";
-            });
+      fetch(`/capnhat/${id}`, {
+        method: 'PUT',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(result => {
+        alert(result.message);
+        window.location.href = '/display.html';
+      })
+      .catch(err => {
+        console.error('Lỗi cập nhật:', err);
+        alert('Cập nhật thất bại!');
+      });
     });
-
-    // Submit form cập nhật
-    document.getElementById("editForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const formData = new FormData();
-        formData.append("tensanpham", document.getElementById("editName").value);
-        formData.append("loaisanpham", document.getElementById("editCategory").value);
-
-        const imageFile = document.getElementById("editImage").files[0];
-        if (imageFile) {
-            formData.append("hinhanh", imageFile);
-        }
-
-        fetch(`/api/sanpham/${productId}`, {
-            method: "PUT",
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("Lỗi khi cập nhật sản phẩm");
-            return response.json();
-        })
-        .then(data => {
-            alert("Cập nhật thành công!");
-            window.location.href = "display.html";
-        })
-        .catch(error => {
-            console.error("Lỗi khi cập nhật sản phẩm:", error);
-            alert("Không thể cập nhật sản phẩm.");
-        });
-    });
-    </script>
+  </script>
 </body>
 </html>

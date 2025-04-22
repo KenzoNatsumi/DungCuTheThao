@@ -58,14 +58,28 @@
                     <th>Hành động</th>
                   </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody id="productList"></tbody>
               </table>
               <button id="deleteAllBtn" style="margin-top: 20px; background-color: red; color: white; border: none; padding: 10px; cursor: pointer;">
                 Xóa tất cả sản phẩm
             </button>
 
               <script>
+                 fetch('/products')
+      .then(res => res.json())
+      .then(data => {
+        const table = document.getElementById('productList');
+        data.forEach(p => {
+          const row = `<tr>
+            <td>${p.tensanpham}</td>
+            <td>${p.loaisanpham}</td>
+            <td>${p.thuonghieu}</td>
+            <td>${p.giasanpham}</td>
+            <td><a href="edit.html?id=${p._id}">Sửa</a></td>
+          </tr>`;
+          table.innerHTML += row;
+        });
+      });
                 const renderTable = (data) => {
                   const tableBody = document.getElementById('SanPhamTable').getElementsByTagName('tbody')[0];
                   tableBody.innerHTML = ''; // Xóa nội dung cũ

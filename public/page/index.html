@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/index.css">
+    <title>Trang Chủ - Quản Lý Sản Phẩm</title>
+</head>
+<body>
+    <header>
+        <div class="logo">LOGO</div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Quản lý sản phẩm</h2>
+            <ul>
+              <li><a href="/add.html">Thêm sản phẩm</a></li>
+              <li><a href="/display.html">Danh sách sản phẩm</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h2>Loại sản phẩm</h2>
+            <div class="product-categories" id="product-categories">
+              </div>
+              <script>
+                fetch('/sanpham/json')
+                  .then(response => response.json())
+                  .then(loaisanpham => {
+                    const container = document.getElementById('product-categories');
+                    loaisanpham.forEach(loai => {
+                      const div = document.createElement("div");
+                      div.className = "category-box";
+                      div.innerHTML = `<h3>${loai.loaisanpham}</h3><p>Số lượng: ${loai.soluong}</p>`;
+                      container.appendChild(div);
+                    });
+                  })
+                  .catch(err => console.error(err));
+              </script>
+        </main>
+    </div>
+</body>
+</html>

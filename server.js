@@ -1,4 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path'); 
@@ -126,57 +126,40 @@ app.get('/dssanpham/json', async (req, res) => {
   }
 });
 
-app.post('/updateSanPham/:id', upload.single('hinhanh'), async (req, res) => {
+// Cập nhật sản phẩm
+app.put('/capnhat/:id', upload.single('hinhanh'), async (req, res) => {
   const { id } = req.params;
-  const { tensanpham, loaisanpham } = req.body;
-  
-  try {
-      await client.connect();
-      const db = client.db(dbName);
-      const collection = db.collection(collectionName);
+  const { tensanpham, loaisanpham, thuonghieu, giasanpham, khuyenmai, mota, bangsize } = req.body;
+  const hinhanh = req.file ? req.file.filename : null;
 
-      const sanpham = await collection.findOne({ id: id });
-
-      if (!sanpham) {
-          return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
-      }
-
-      const updatedData = {
-          tensanpham,
-          loaisanpham,
-      };
-
-      if (req.file) {
-          updatedData.hinhanh = req.file.filename;
-      }
-
-      await collection.updateOne({ id: id }, { $set: updatedData });
-
-      res.json({ message: "Cập nhật thành công!" });
-  } catch (error) {
-      console.error('Lỗi khi cập nhật sản phẩm trong MongoDB:', error);
-      res.status(500).json({ message: "Lỗi hệ thống" });
-  }
-});
-
-// API xóa 1 sản phẩm theo ID
-app.delete('/dssanpham/:id', async (req, res) => {
-  const productId = req.params.id;
   try {
     const collection = await connectDB();
-    const result = await collection.deleteOne({ id: productId });
 
-    if (result.deletedCount === 1) {
-      res.send(`Sản phẩm với ID = ${productId} đã bị xóa.`);
-    } else {
-      res.status(404).send(`Sản phẩm với ID = ${productId} không tồn tại.`);
+    const existingProduct = await collection.findOne({ id });
+    if (!existingProduct) {
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm để cập nhật' });
     }
+
+    const updateFields = {
+      tensanpham,
+      loaisanpham,
+      thuonghieu,
+      giasanpham,
+      khuyenmai,
+      mota,
+      bangsize: Array.isArray(bangsize) ? bangsize : [bangsize],
+    };
+
+    if (hinhanh) updateFields.hinhanh = hinhanh;
+
+    await collection.updateOne({ id }, { $set: updateFields });
+
+    res.json({ message: `Sản phẩm ${id} đã được cập nhật thành công!` });
   } catch (error) {
-    console.error('Lỗi khi xóa sản phẩm từ MongoDB:', error);
-    res.status(500).send('Lỗi hệ thống');
+    console.error('Lỗi khi cập nhật sản phẩm:', error);
+    res.status(500).json({ message: 'Lỗi hệ thống' });
   }
 });
-
 
 // API xóa tất cả sản phẩm
 app.delete('/dssanpham', async (req, res) => {
