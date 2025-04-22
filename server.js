@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path'); 
@@ -158,6 +158,24 @@ app.put('/capnhat/:id', upload.single('hinhanh'), async (req, res) => {
   } catch (error) {
     console.error('Lỗi khi cập nhật sản phẩm:', error);
     res.status(500).json({ message: 'Lỗi hệ thống' });
+  }
+});
+
+app.delete('/dssanpham/:id', async (req, res) => {
+  const productId = req.params.id;
+
+  try {
+    const collection = await connectDB();
+    const result = await collection.deleteOne({ id: productId }); // Dùng `id`, không phải `_id`
+
+    if (result.deletedCount === 1) {
+      res.send(`Sản phẩm với ID = ${productId} đã bị xóa.`);
+    } else {
+      res.status(404).send(`Sản phẩm với ID = ${productId} không tồn tại.`);
+    }
+  } catch (error) {
+    console.error('❌ Lỗi khi xóa sản phẩm:', error);
+    res.status(500).send('Lỗi máy chủ');
   }
 });
 
