@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path'); 
@@ -47,14 +47,18 @@ const connectDB = async () => {
 };
 
 // API lấy danh sách sản phẩm
-app.get('/list', async (req, res) => {
+app.get('/dssanpham', async (req, res) => {
   try {
-    const collection = await connectDB();
-    const sanphamList = await collection.find({}).toArray();
-    res.json(sanphamList);
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+
+    const danhSach = await collection.find({}).toArray();
+    console.log("Dữ liệu lấy từ MongoDB:", danhSach);
+    res.json(danhSach);
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách sản phẩm từ MongoDB:', error);
-    res.status(500).json({ message: "Lỗi hệ thống" });
+    console.error("Lỗi khi lấy danh sách sản phẩm:", error);
+    res.status(500).json({ error: 'Lỗi server' });
   }
 });
 
@@ -193,20 +197,56 @@ app.delete('/dssanpham', async (req, res) => {
   }
 });
 
-// API tìm kiếm sản phẩm theo tên
-app.get('/sanpham/timkiem/:tensanpham', async (req, res) => {
-  const tensanpham = req.params.tensanpham.toLowerCase();
+app.get('/api/sanpham/filter', async (req, res) => {
   try {
-    const collection = await connectDB();
-    const sptheoten = await collection.find({ tensanpham: { $regex: tensanpham, $options: 'i' } }).toArray();
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
 
-    if (sptheoten.length === 0) {
-      return res.status(404).json({ message: 'Không tìm thấy sản phẩm nào' });
+    const { category, trademark, price } = req.query;
+
+    const query = {};
+    if (category) query.loaisanpham = category;
+    if (trademark) query.thuonghieu = trademark;
+
+    const allData = await collection.find(query).toArray();
+
+    let filtered = allData;
+
+    if (price) {
+      filtered = allData.filter(sp => {
+        const gia = parseInt(sp.giasanpham);
+        if (price === '0-500000') return gia < 500000;
+        if (price === '500000-1000000') return gia >= 500000 && gia <= 1000000;
+        if (price === '1000000-2000000') return gia > 1000000 && gia <= 2000000;
+        if (price === '2000000+') return gia > 2000000;
+        return true;
+      });
     }
-    res.json(sptheoten);
+
+    res.json(filtered);
   } catch (error) {
-    console.error('Lỗi khi tìm kiếm sản phẩm trong MongoDB:', error);
-    res.status(500).json({ message: "Lỗi hệ thống" });
+    console.error("Lỗi khi lọc sản phẩm:", error);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+});
+
+app.get('/api/sanpham/search', async (req, res) => {
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+
+    const { keyword } = req.query;
+    const query = keyword
+      ? { tensanpham: { $regex: keyword, $options: 'i' } }
+      : {};
+
+    const danhSach = await collection.find(query).toArray();
+    res.json(danhSach);
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm sản phẩm:", error);
+    res.status(500).json({ error: 'Lỗi server' });
   }
 });
 

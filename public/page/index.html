@@ -19,24 +19,27 @@
             </ul>
         </aside>
         <main class="content">
-            <h2>Loại sản phẩm</h2>
-            <div class="product-categories" id="product-categories">
-              </div>
-              <script>
-                fetch('/sanpham/json')
-                  .then(response => response.json())
-                  .then(loaisanpham => {
-                    const container = document.getElementById('product-categories');
-                    loaisanpham.forEach(loai => {
-                      const div = document.createElement("div");
-                      div.className = "category-box";
-                      div.innerHTML = `<h3>${loai.loaisanpham}</h3><p>Số lượng: ${loai.soluong}</p>`;
-                      container.appendChild(div);
-                    });
-                  })
-                  .catch(err => console.error(err));
-              </script>
+            <h2>Website Quản lý Dụng cụ Thể thao</h2>
+            <section class="intro">
+                <p>Chào mừng bạn đến với hệ thống <strong>Quản lý sản phẩm dụng cụ thể thao</strong>! Đây là một website mô phỏng được xây dựng bằng <strong>Node.js</strong> và <strong>MongoDB</strong>, nhằm mục đích học tập và thực hành phát triển ứng dụng web.</p>
+        
+                <p>Trang web hỗ trợ các chức năng quản lý sản phẩm cơ bản bao gồm: thêm mới, chỉnh sửa, xóa sản phẩm, tìm kiếm theo từ khóa, lọc theo loại sản phẩm, thương hiệu và khoảng giá. Giao diện trực quan, dễ sử dụng giúp người dùng thao tác nhanh chóng và hiệu quả.</p>
+        
+                <p>Hệ thống cũng được tích hợp phân trang tự động, hỗ trợ hiển thị danh sách sản phẩm một cách khoa học và dễ theo dõi. Dữ liệu sản phẩm được lưu trữ và truy xuất thông qua MongoDB, đảm bảo hiệu suất và khả năng mở rộng tốt.</p>
+        
+                <h3>Thông tin nhóm phát triển:</h3>
+                <p>Dự án được thực hiện bởi nhóm sinh viên:</p>
+                <ul class="team-list">
+                    <li><strong>Đặng Duy Khôi - 2374801030035</strong></li>
+                    <li><strong>Phan Công Duy Trường - 2374801030456</strong></li>
+                    <li><strong>Nguyễn Vinh Hiển -  2374801030021</strong></li>
+                    <li><strong>Lê Nguyễn Đăng Khoa - 2374801030437</strong></li>
+                </ul>
+        
+                <p>Website này là một phần của đồ án học phần môn <strong>Kỹ thuật phần mềm</strong>, với mục tiêu giúp sinh viên hiểu rõ hơn về cách xây dựng một ứng dụng quản lý dữ liệu thực tế.</p>
+            </section>
         </main>
+        
     </div>
 </body>
 </html>

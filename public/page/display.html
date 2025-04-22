@@ -25,6 +25,13 @@
                   <select id="categoryFilter">
                     <option value="">Chọn loại sản phẩm</option>
                   </select>
+                  <select id="trademarkFilter">
+                    <option value="">Chọn thương hiệu</option>
+                  </select>
+                  <select id="priceFilter">
+                    <option value="">Chọn mức giá</option>
+                  </select>
+                  <button id="Filter">Lọc</button>
                   <button id="resetFilter">Reset</button>
                 </div>
                 <div class="filter-right">
@@ -33,18 +40,39 @@
                 </div>
               </div>
               <script>
-                fetch('/sanpham/json')
+                fetch('/dssanpham')
                 .then(response => response.json())
-                .then(loaisanpham => {
-                    const categoryFilter = document.getElementById('categoryFilter');
-                    loaisanpham.forEach(loai => {
-                        const option = document.createElement('option');
-                        option.value = loai.loaisanpham;
-                        option.textContent = loai.loaisanpham;
-                        categoryFilter.appendChild(option);
-                    });
-                })
-                .catch(err => console.error(err));
+                .then(data => {
+                  fullData = data;          
+                  const categorySet = new Set();
+                  const trademarkSet = new Set();
+                  data.forEach(sp => {
+                    if (sp.loaisanpham) categorySet.add(sp.loaisanpham);
+                    if (sp.thuonghieu) trademarkSet.add(sp.thuonghieu);
+                  });
+                  const categoryFilter = document.getElementById('categoryFilter');
+                  categorySet.forEach(loai => {
+                    const option = document.createElement('option');
+                    option.value = loai;
+                    option.textContent = loai;
+                    categoryFilter.appendChild(option);
+                  });
+                  const trademarkFilter = document.getElementById('trademarkFilter');
+                  trademarkSet.forEach(hieu => {
+                    const option = document.createElement('option');
+                    option.value = hieu;
+                    option.textContent = hieu;
+                    trademarkFilter.appendChild(option);
+                  });
+                  const priceFilter = document.getElementById('priceFilter');
+                  priceFilter.innerHTML = `
+                    <option value="">Chọn mức giá</option>
+                    <option value="0-500000">Dưới 500.000đ</option>
+                    <option value="500000-1000000">500.000đ - 1.000.000đ</option>
+                    <option value="1000000-2000000">1.000.000đ - 2.000.000đ</option>
+                    <option value="2000000+">Trên 2.000.000đ</option>
+                  `;
+                })    
               </script>
             <table id="SanPhamTable">
                 <thead>
@@ -80,6 +108,9 @@
           table.innerHTML += row;
         });
       });
+      const itemsPerPage = 10;
+              let currentPage = 1;
+              let fullData = [];
                 const renderTable = (data) => {
                   const tableBody = document.getElementById('SanPhamTable').getElementsByTagName('tbody')[0];
                   tableBody.innerHTML = ''; // Xóa nội dung cũ
@@ -140,78 +171,95 @@
                   });
                 };
 
+                function renderPagination(totalItems) {
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                const pagination = document.getElementById('pagination');
+                pagination.innerHTML = '';
+              
+                for (let i = 1; i <= totalPages; i++) {
+                  const btn = document.createElement('button');
+                  btn.textContent = i;
+                  btn.style.margin = '0 5px';
+                  btn.style.padding = '5px 10px';
+                  btn.style.border = '1px solid #ccc';
+                  btn.style.cursor = 'pointer';
+                  btn.style.backgroundColor = (i === currentPage) ? '#007bff' : 'white';
+                  btn.style.color = (i === currentPage) ? 'white' : 'black';
+              
+                  btn.onclick = () => {
+                    currentPage = i;
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    renderTable(fullData.slice(start, end));
+                    renderPagination(fullData.length);
+                  };
+              
+                  pagination.appendChild(btn);
+                }
+              }
               
                 // Ban đầu, load tất cả sản phẩm từ '/dssanPham/json'
-                fetch('/dssanPham/json')
-                  .then(response => response.json())
+                function fetchAllProducts() {
+                fetch('/dssanpham')
+                  .then(res => res.json())
                   .then(data => {
-                    renderTable(data);
+                    fullData = data;
+                    currentPage = 1;
+                    renderTable(fullData.slice(0, itemsPerPage));
+                    renderPagination(fullData.length);
                   })
-                  .catch(error => {
-                    console.error('Lỗi khi tải sản phẩm:', error);
-                    alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
+                  .catch(err => {
+                    console.error("Lỗi khi tải sản phẩm:", err);
                   });
+              }
+
+                function fetchFilteredProducts() {
+                const category = document.getElementById('categoryFilter').value;
+                const trademark = document.getElementById('trademarkFilter').value;
+                const price = document.getElementById('priceFilter').value;
               
-                // Khi chọn loại sản phẩm từ dropdown, sử dụng API '/sanpham/:loaisanpham'
-                document.getElementById('categoryFilter').addEventListener('change', function() {
-                  const selected = this.value;
-                  if (selected) {
-                    fetch(`/sanpham/${selected}`)
-                      .then(response => {
-                        if (!response.ok) {
-                          throw new Error('Không tìm thấy sản phẩm cho loại này');
-                        }
-                        return response.json();
-                      })
-                      .then(data => {
-                        renderTable(data);
-                      })
-                      .catch(error => {
-                        console.error('Lỗi khi lấy dữ liệu:', error);
-                        alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
-                      });
-                  } else {
-                    // Nếu không chọn loại nào thì load tất cả sản phẩm
-                    fetch('/dssanpham/json')
-                      .then(response => response.json())
-                      .then(data => {
-                        renderTable(data);
-                      })
-                      .catch(error => {
-                        console.error('Lỗi khi tải sản phẩm:', error);
-                        alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
-                      });
-                  }
-                });
+                const params = new URLSearchParams({ category, trademark, price });
               
-                // Sự kiện nút Reset: xoá bộ lọc và load lại tất cả sản phẩm
-                document.getElementById('resetFilter').addEventListener('click', function() {
-                  document.getElementById('categoryFilter').value = "";
-                  document.getElementById('searchInput').value = "";
-                  fetch('/dssanPham/json')
-                    .then(response => response.json())
-                    .then(data => {
-                      renderTable(data);
-                    })
-                    .catch(error => {
-                      console.error('Lỗi khi tải sản phẩm:', error);
-                      alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
-                    });
-                });
+                fetch(`/api/sanpham/filter?${params.toString()}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    fullData = data;
+                    currentPage = 1;
+                    renderTable(fullData.slice(0, itemsPerPage));
+                    renderPagination(fullData.length);
+                  })
+                  .catch(err => console.error("Lỗi khi lọc sản phẩm:", err));
+              }
               
-                // Sự kiện nút Tìm kiếm: lọc theo tên sản phẩm
-                document.getElementById('searchButton').addEventListener('click', function() {
-                  const query = document.getElementById('searchInput').value.toLowerCase();
-                  fetch('/sanpham/timkiem/${query}')
-                    .then(response => response.json())
-                    .then(data => {
-                      renderTable(data);
-                    })
-                    .catch(error => {
-                      console.error('Lỗi khi tìm kiếm:', error);
-                      alert('Không thể tìm kiếm sản phẩm!');
-                   });
-                });
+              function fetchSearchResults() {
+                const keyword = document.getElementById('searchInput').value;
+                const params = new URLSearchParams({ keyword });
+              
+                fetch(`/api/sanpham/search?${params.toString()}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    fullData = data;
+                    currentPage = 1;
+                    renderTable(fullData.slice(0, itemsPerPage));
+                    renderPagination(fullData.length);
+                  })
+                  .catch(err => console.error("Lỗi khi tìm kiếm:", err));
+              }
+              
+              // Gắn sự kiện cho các nút
+              
+              document.getElementById('Filter').addEventListener('click', fetchFilteredProducts);
+              document.getElementById('searchButton').addEventListener('click', fetchSearchResults);
+              document.getElementById('resetFilter').addEventListener('click', () => {
+                document.getElementById('categoryFilter').value = '';
+                document.getElementById('trademarkFilter').value = '';
+                document.getElementById('priceFilter').value = '';
+                document.getElementById('searchInput').value = '';
+                fetchAllProducts();
+              });
+              
+              // Hiển thị sản phẩm ban đầu
+              fetchAllProducts();
               
                 // Xóa tất cả sản phẩm
                 document.getElementById('deleteAllBtn').addEventListener('click', () => {
