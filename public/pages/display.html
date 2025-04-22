@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/display.css">
+    <title>Danh Sách Sản Phẩm</title>
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="/">LOGO</a></div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Quản lý sản phẩm</h2>
+            <ul>
+                <li><a href="/add.html">Thêm sản phẩm</a></li>
+                <li><a href="/display.html">Danh sách sản phẩm</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h2>Danh sách sản phẩm</h2>
+            <div class="filter-section">
+                <div class="filter-left">
+                  <select id="categoryFilter">
+                    <option value="">Chọn loại sản phẩm</option>
+                  </select>
+                  <button id="resetFilter">Reset</button>
+                </div>
+                <div class="filter-right">
+                  <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm...">
+                  <button id="searchButton">Tìm kiếm</button>
+                </div>
+              </div>
+              <script>
+                fetch('/sanpham/json')
+                .then(response => response.json())
+                .then(loaisanpham => {
+                    const categoryFilter = document.getElementById('categoryFilter');
+                    loaisanpham.forEach(loai => {
+                        const option = document.createElement('option');
+                        option.value = loai.loaisanpham;
+                        option.textContent = loai.loaisanpham;
+                        categoryFilter.appendChild(option);
+                    });
+                })
+                .catch(err => console.error(err));
+              </script>
+            <table id="SanPhamTable">
+                <thead>
+                  <tr>
+                    <th>Mã sản phẩm</th>
+                    <th>Loại sản phẩm</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Khuyến mãi</th>
+                    <th>Giá</th>
+                    <th>Ảnh</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+              <button id="deleteAllBtn" style="margin-top: 20px; background-color: red; color: white; border: none; padding: 10px; cursor: pointer;">
+                Xóa tất cả sản phẩm
+            </button>
+
+              <script>
+                const renderTable = (data) => {
+                  const tableBody = document.getElementById('SanPhamTable').getElementsByTagName('tbody')[0];
+                  tableBody.innerHTML = ''; // Xóa nội dung cũ
+                  data.forEach(sanpham => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = sanpham.id;
+                    row.insertCell(1).textContent = sanpham.loaisanpham;
+                    row.insertCell(2).textContent = sanpham.tensanpham;
+                    row.insertCell(3).textContent = sanpham.khuyenmai;
+                    row.insertCell(4).textContent = sanpham.giasanpham.toLocaleString('vi-VN') + ' VND';
+                    
+                    const cellImage = row.insertCell(5);
+                    const img = document.createElement('img');
+                    img.src = `/images/${sanpham.hinhanh}`;
+                    img.style.width = '100px';
+                    img.style.height = 'auto';
+                    cellImage.appendChild(img);
+                    
+                    // Thêm cột hành động cho nút Sửa và nút Xóa
+                    const cellActions = row.insertCell(6);
+                    
+                    // Nút Sửa
+                    const editLink = document.createElement('a');
+                    editLink.href = `edit.html?id=${sanpham.id}`;
+                    editLink.textContent = 'Sửa';
+                    editLink.style.marginRight = '10px';
+                    
+                    // Nút Xóa
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Xóa';
+                    deleteBtn.style.backgroundColor = 'red';
+                    deleteBtn.style.color = 'white';
+                    deleteBtn.style.border = 'none';
+                    deleteBtn.style.padding = '5px';
+                    deleteBtn.style.cursor = 'pointer';
+                    deleteBtn.onclick = function () {
+                      fetch(`/dssanpham/${sanpham.id}`, { method: 'DELETE' })
+                        .then(response => response.text())
+                        .then(message => {
+                            alert(message);
+                            location.reload(); // Load lại trang sau khi xóa
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            alert('Lỗi khi xóa sản phẩm');
+                        });
+                    };
+                    
+                    const detailLink = document.createElement('a');
+                    detailLink.href = `detail.html?id=${sanpham.id}`;
+                    detailLink.textContent = 'Chi tiết';
+                    detailLink.style.display = 'block';
+                    detailLink.style.marginTop = '10px';
+
+                    cellActions.appendChild(editLink);
+                    cellActions.appendChild(deleteBtn);
+                    cellActions.appendChild(detailLink);
+                  });
+                };
+
+              
+                // Ban đầu, load tất cả sản phẩm từ '/dssanPham/json'
+                fetch('/dssanPham/json')
+                  .then(response => response.json())
+                  .then(data => {
+                    renderTable(data);
+                  })
+                  .catch(error => {
+                    console.error('Lỗi khi tải sản phẩm:', error);
+                    alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
+                  });
+              
+                // Khi chọn loại sản phẩm từ dropdown, sử dụng API '/sanpham/:loaisanpham'
+                document.getElementById('categoryFilter').addEventListener('change', function() {
+                  const selected = this.value;
+                  if (selected) {
+                    fetch(`/sanpham/${selected}`)
+                      .then(response => {
+                        if (!response.ok) {
+                          throw new Error('Không tìm thấy sản phẩm cho loại này');
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        renderTable(data);
+                      })
+                      .catch(error => {
+                        console.error('Lỗi khi lấy dữ liệu:', error);
+                        alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
+                      });
+                  } else {
+                    // Nếu không chọn loại nào thì load tất cả sản phẩm
+                    fetch('/dssanpham/json')
+                      .then(response => response.json())
+                      .then(data => {
+                        renderTable(data);
+                      })
+                      .catch(error => {
+                        console.error('Lỗi khi tải sản phẩm:', error);
+                        alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
+                      });
+                  }
+                });
+              
+                // Sự kiện nút Reset: xoá bộ lọc và load lại tất cả sản phẩm
+                document.getElementById('resetFilter').addEventListener('click', function() {
+                  document.getElementById('categoryFilter').value = "";
+                  document.getElementById('searchInput').value = "";
+                  fetch('/dssanPham/json')
+                    .then(response => response.json())
+                    .then(data => {
+                      renderTable(data);
+                    })
+                    .catch(error => {
+                      console.error('Lỗi khi tải sản phẩm:', error);
+                      alert('Không thể tải dữ liệu. Vui lòng thử lại sau!');
+                    });
+                });
+              
+                // Sự kiện nút Tìm kiếm: lọc theo tên sản phẩm
+                document.getElementById('searchButton').addEventListener('click', function() {
+                  const query = document.getElementById('searchInput').value.toLowerCase();
+                  fetch('/sanpham/timkiem/${query}')
+                    .then(response => response.json())
+                    .then(data => {
+                      renderTable(data);
+                    })
+                    .catch(error => {
+                      console.error('Lỗi khi tìm kiếm:', error);
+                      alert('Không thể tìm kiếm sản phẩm!');
+                    });
+                });
+              
+                // Xóa tất cả sản phẩm
+                document.getElementById('deleteAllBtn').addEventListener('click', () => {
+                  if (confirm("Bạn có chắc chắn muốn xóa tất cả sản phẩm không?")) {
+                    fetch('/dssanpham', { method: 'DELETE' })
+                      .then(response => response.text())
+                      .then(message => {
+                        alert(message);
+                        location.reload();
+                      })
+                      .catch(error => {
+                        console.error(error);
+                        alert('Lỗi khi xóa tất cả sản phẩm');
+                      });
+                  }
+                });
+              </script>
+        </main>
+    </div>
+</body>
+</html>
