@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chi tiết sản phẩm</title>
+    <link rel="stylesheet" href="../styles/detail.css" />
+</head>
+
+<body>
+    <header>
+        <div class="logo"><a href="/">LOGO</a></div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Quản lý sản phẩm</h2>
+            <ul>
+                <li><a href="/add.html">Thêm sản phẩm</a></li>
+                <li><a href="/display.html">Danh sách sản phẩm</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <h2>Chi tiết sản phẩm</h2>
+            <div class="detail-card">
+                <div class="left">
+                    <img id="productImage" src="" alt="Hình ảnh sản phẩm" />
+                </div>
+                <div class="right">
+                    <h2 id="productName"></h2>
+                    <p><strong>Loại:</strong> <span id="productCategory"></span></p>
+                    <p><strong>Thương hiệu:</strong> <span id="productBrand"></span></p>
+                    <p><strong>Giá:</strong> <span id="productPrice"></span></p>
+                    <p><strong>Khuyến mãi:</strong> <span id="productDiscount"></span></p>
+                    <p><strong>Mô tả:</strong></p>
+                    <p id="productDescription"></p>
+
+                    <h4>Bảng size</h4>
+                    <table id="sizeTable">
+                        <thead>
+                            <tr>
+                                <th>Size</th>
+                                <th>Màu</th>
+                                <th>Số lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <h4>Q&A</h4>
+                    <div id="qnaSection"></div>
+
+                    <h4>Bình luận</h4>
+                    <div id="commentsSection"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const productId = new URLSearchParams(window.location.search).get("id");
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch(`/getSanPham/${productId}`)
+                .then(res => res.json())
+                .then(sp => {
+
+                    document.getElementById("productImage").src = sp.hinhanh;
+                    document.getElementById("productName").textContent = sp.tensanpham;
+                    document.getElementById("productCategory").textContent = sp.loaisanpham;
+                    document.getElementById("productBrand").textContent = sp.thuonghieu;
+                    document.getElementById("productPrice").textContent = Number(sp.giasanpham).toLocaleString('vi-VN') + " VNĐ";
+                    document.getElementById("productDiscount").textContent = sp.khuyenmai;
+                    document.getElementById("productDescription").textContent = sp.mota;
+
+                    const sizeTable = document.querySelector("#sizeTable tbody");
+                    sp.bangsize.forEach(item => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `<td>${item.size}</td><td>${item.mausac}</td><td>${item.soluong}</td>`;
+                        sizeTable.appendChild(row);
+                    });
+
+                    const qnaSection = document.getElementById("qnaSection");
+                    sp.qna.forEach(qa => {
+                        const div = document.createElement("div");
+                        div.classList.add("qna-item");
+                        div.innerHTML = `
+                        <p><strong>Q:</strong> ${qa.cauhoi}</p>
+                        <p><strong>A:</strong> ${qa.traloi}</p>
+                        <hr/>
+                        `;
+                        qnaSection.appendChild(div);
+                    });
+
+
+                    const comments = document.getElementById("commentsSection");
+                    sp.binhluan.forEach(bl => {
+                        const div = document.createElement("div");
+                        div.innerHTML = `<p><strong>${bl.ten}</strong> (⭐ ${bl.sosao})</p><p>${bl.noidung}</p><hr/>`;
+                        comments.appendChild(div);
+                    });
+                });
+        });
+    </script>
+</body>
+
+</html>
