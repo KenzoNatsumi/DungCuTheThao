@@ -16,7 +16,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public/page')));
 app.use(express.static(path.join(__dirname, 'public/images/')));
-app.use(express.static('public'));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/page/index.html');
@@ -96,14 +97,18 @@ const getProductCode = (loaisanpham) => {
 
 const generateProductId = async (loaisanpham, db) => {
   const productCode = getProductCode(loaisanpham);
+  console.log("Mã loại sản phẩm:", productCode);
     try {
         const counter = await db.collection('counters').findOneAndUpdate(
             { _id: productCode },
             { $inc: { seq: 1 } },
             { upsert: true, returnDocument: 'after' }
         );
+        console.log("Kết quả findOneAndUpdate:", counter);
+        if (counter && counter.seq !== undefined) {
         const nextCounter = counter.seq.toString().padStart(4, '0');
         return `${productCode}${nextCounter}`;
+        }
     } catch (error) {
         console.error("Lỗi khi tạo ID:", error);
         return null; // Hoặc một giá trị mặc định/xử lý lỗi khác
@@ -114,7 +119,7 @@ const generateProductId = async (loaisanpham, db) => {
 app.post('/them', upload.single('hinhanh'), async (req, res) => {
   console.log("Dữ liệu nhận được từ frontend:", req.body);
   const { tensanpham, loaisanpham, thuonghieu, giasanpham, khuyenmai, mota, bangsize } = req.body;
-  const hinhanh = req.file ? req.file.filename : null;
+  const hinhanh = req.file ? '/images/' + req.file.filename : null;
   let newId;
 
   try {
@@ -125,6 +130,8 @@ app.post('/them', upload.single('hinhanh'), async (req, res) => {
       if (!newId) {
           return res.status(500).json({ message: 'Lỗi khi tạo ID sản phẩm.' });
       }
+
+      console.log("ID sản phẩm mới:", newId);
 
       let parsedBangSize = [];
       if (bangsize) {

@@ -139,11 +139,15 @@
                     row.insertCell(5).textContent = sanpham.giasanpham.toLocaleString('vi-VN') + ' VND';
                     
                     const cellImage = row.insertCell(6);
-                    const img = document.createElement('img');
-                    img.src = `/images/${sanpham.hinhanh}`;
-                    img.style.width = '100px';
-                    img.style.height = 'auto';
-                    cellImage.appendChild(img);
+                    if (sanpham.hinhanh) {
+                        const img = document.createElement('img');
+                        img.src = sanpham.hinhanh; // Sử dụng đường dẫn đầy đủ từ server
+                        img.style.width = '100px';
+                        img.style.height = 'auto';
+                        cellImage.appendChild(img);
+                    } else {
+                        cellImage.textContent = 'Không có ảnh';
+                    }
                     
                     // Thêm cột hành động cho nút Sửa và nút Xóa
                     const cellActions = row.insertCell(7);
