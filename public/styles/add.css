@@ -1,0 +1,219 @@
+/* Reset mặc định (nếu bạn chưa có một file reset riêng) */
+/* Bạn có thể bỏ qua phần này nếu đã có reset trong index.css */
+/*
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+*/
+
+/* Layout chính cho trang add.html */
+.container {
+    display: flex;
+    margin-top: 60px; /* Để tránh bị header cố định che khuất */
+}
+
+/* Sidebar (kế thừa từ index.css) */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #2C3E50;
+    color: white;
+    padding-top: 20px;
+    position: fixed;
+    left: 0;
+    top: 50px;
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+.sidebar h2 {
+    text-align: center;
+    padding-bottom: 20px;
+    font-size: 30px;
+    border-bottom: 1px solid black;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    border-bottom: 1px solid black;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    padding: 20px 20px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+    background: #1A252F;
+    border-radius: 5px;
+}
+
+/* Nội dung chính của trang thêm sản phẩm */
+.content {
+    margin-left: 270px; /* Để nhường chỗ cho sidebar */
+    padding: 30px;
+    background-color: #f9f9f9; /* Màu nền nhạt hơn để tạo sự khác biệt */
+    min-height: calc(100vh - 60px);
+    box-sizing: border-box;
+}
+
+.content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+}
+
+/* Form thêm sản phẩm */
+.product-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.product-form input[type="text"],
+.product-form input[type="number"],
+.product-form input[type="file"],
+.product-form textarea,
+.product-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.product-form textarea {
+    resize: vertical; /* Cho phép kéo dọc textarea */
+    min-height: 100px;
+}
+
+.product-form button[type="submit"],
+.product-form button[type="button"] {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+.product-form button[type="submit"]:hover,
+.product-form button[type="button"]:hover {
+    background-color: #0056b3;
+}
+
+/* Стиль для полей добавления размера */
+#sizeInputsContainer {
+    margin-bottom: 15px;
+}
+
+.size-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.size-input input[type="text"],
+.size-input input[type="number"] {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.size-input button.removeSizeBtn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.size-input button.removeSizeBtn:hover {
+    background-color: #c82333;
+}
+
+#addSizeBtn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 15px;
+}
+
+#addSizeBtn:hover {
+    background-color: #1e7e34;
+}
+
+/* ===== RESPONSIVE (kế thừa từ index.css) ===== */
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        margin-top: auto; /* Reset margin-top khi ở chế độ mobile */
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: auto; /* Reset top khi ở chế độ mobile */
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 20px;
+        min-height: auto; /* Reset min-height khi ở chế độ mobile */
+    }
+}
+/* Header */
+header {
+    background: #2C3E50;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 20px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.product-form-group {
+    margin-bottom: 15px;
+}
+
+.product-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}

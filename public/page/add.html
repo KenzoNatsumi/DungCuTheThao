@@ -1,245 +1,134 @@
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../styles/display.css">
-  <title>Thêm Sản Phẩm</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/add.css">
+    <title>Thêm Sản Phẩm</title>
 </head>
-<style>
-  body {
-    font-family: Arial;
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-  }
-
-  label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-  }
-
-  input,
-  textarea,
-  select {
-    width: 100%;
-    padding: 6px;
-    margin-top: 5px;
-  }
-
-  fieldset {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-
-  legend {
-    font-weight: bold;
-  }
-
-  .row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .row>* {
-    flex: 1;
-  }
-
-  button {
-    padding: 10px 20px;
-    margin-top: 20px;
-  }
-</style>
-
 <body>
-  <header>
-    <div class="logo"><a href="/">LOGO</a></div>
-</header>
-  <div class="container">
-    <aside class="sidebar">
-        <h2>Quản lý sản phẩm</h2>
-        <ul>
-            <li><a href="/add.html">Thêm sản phẩm</a></li>
-            <li><a href="/display.html">Danh sách sản phẩm</a></li>
-        </ul>
-    </aside>
-    <main class="content">
-        <h2>Thêm sản phẩm</h2>
-        <form id="productForm" enctype="multipart/form-data" method="POST">
-          <h1>Nhập Thông Tin Sản Phẩm</h1>
-          <label for="masp">Mã sản phẩm</label>
-          <input type="text" id="maSanPham" name="maSanPham" min="0" max="9999" placeholder="Mã tạo tự động"
-              style="width: 200px; padding: 6px; border: 1px solid #ccc; border-left: none; border-radius: 0 4px 4px 0;" readonly/>
-          <br>
-      
-          <label for="loaisanpham">Loại sản phẩm</label>
-          <select id="loaiSanPham" name="loaisanpham" onchange="taoMaSanPham()">
-            <option value="">Chọn loại sản phẩm</option>
-            <option value="AOBD">Áo bóng đá</option>
-            <option value="DCTT">Dụng cụ thể thao</option>
-            <option value="GIAY">Giày</option>
-            </select>
-          <br>
-      
-          <label for="tensanpham">Tên sản phẩm</label>
-          <input type="text" id="tensanpham" name="tensanpham">
-          <br>
-      
-      
-          <label for="thuonghieu">Thương hiệu</label>
-          <input type="text" id="thuonghieu" name="thuonghieu">
-          <br>
-      
-          <label for="giasanpham">Giá sản phẩm (VNĐ)</label>
-          <input type="number" id="giasanpham" name="giasanpham">
-          <br>
-      
-          <label for="khuyenmai">Khuyến mãi</label>
-          <input type="text" id="khuyenmai" name="khuyenmai">
-          <br>
-      
-          <label for="mota">Mô tả</label>
-          <textarea id="mota" name="mota" rows="3" style="resize: none;"></textarea>
-      
-          <label for="hinhanh">Tên file hình ảnh (VD: giay1.jpg)</label>
-          <input type="text" id="hinhanh" name="hinhanh" placeholder="Nhập tên file ảnh (VD: giay1.jpg)">
-      
-          <fieldset>
-            <legend>Bảng Size & Màu Sắc</legend>
-            <div id="size-section">
-              <div class="size-block">
-                <label>Size</label>
-                <input type="text" name="size[]" placeholder="VD: M, L, XL...">
-                <label>Màu sắc</label>
-                <input type="text" name="mausac[]" placeholder="VD: Đỏ, Xanh, Đen...">
-                <label>Số lượng</label>
-                <input type="number" name="soluong[]" min="0" placeholder="VD: 10">
-              </div>
-            </div>
-            <button type="button" onclick="addSize()">+ Thêm Size</button>
-            <button type="button" onclick="removeSize(this)">Xóa</button>
-          </fieldset>
-      
-          <button type="submit">Gửi</button>
-        </form>
-    </main>
-</div>
+    <header>
+        <div class="logo"><a href="/">LOGO</a></div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Quản lý sản phẩm</h2>
+            <ul>
+                <li><a href="/add.html">Thêm sản phẩm</a></li>
+                <li><a href="/display.html">Danh sách sản phẩm</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h2>Thêm Sản Phẩm Mới</h2>
+            <form class="product-form" id="addProductForm" enctype="multipart/form-data">
+                <label for="tensanpham">Tên sản phẩm:</label>
+                <input type="text" id="tensanpham" name="tensanpham" required>
 
-<script>
-  async function taoMaSanPham() {
-    const loai = document.getElementById("loaiSanPham").value;
+                <label for="loaiSanPham">
+                  Loại sản phẩm:
+                  <select id="loaiSanPham" name="loaisanPham" onchange="taoMaSanPham()" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
+                      <option value="">Chọn loại sản phẩm</option>
+                      <option value="Áo bóng đá">Áo bóng đá</option>
+                      <option value="Dụng cụ thể thao">Dụng cụ thể thao</option>
+                      <option value="Giày">Giày</option>
+                  </select>
+              </label>
 
-    if (!loai) {
-      document.getElementById("maSanPham").value = "";
-      return;
-    }
+                <label for="thuonghieu">Thương hiệu:</label>
+                <input type="text" id="thuonghieu" name="thuonghieu" required>
 
-    const res = await fetch("/api/tao-ma", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ loaiSanPham: loai }),
-    });
+                <label for="giasanpham">Giá sản phẩm:</label>
+                <input type="number" id="giasanpham" name="giasanpham" required>
 
-    const data = await res.json();
-    document.getElementById("maSanPham").value = data.maSanPham;
-  }
-</script>
+                <label for="khuyenmai">Khuyến mãi:</label>
+                <input type="text" id="khuyenmai" name="khuyenmai">
 
-  <script>
-    let sizeCount = 1;
+                <label for="hinhanh">Hình ảnh:</label>
+                <input type="file" id="hinhanh" name="hinhanh">
 
-    function addSize() {
-      
-      const container = document.getElementById("size-section");
-      const sizeBlocks = document.querySelectorAll(".size-block");
-      const currentIndex = sizeBlocks.length + 1;
+                <label for="mota">Mô tả:</label>
+                <textarea id="mota" name="mota"></textarea>
 
-      const newSizeBlock = document.createElement("div");
-      newSizeBlock.className = "size-block";
-      newSizeBlock.innerHTML = `
-        <div class="size-header">➤ Size #${currentIndex}</div>
-        <label>Size</label>
-        <input type="text" name="size[]" placeholder="VD: M, L, XL...">
-        <label>Màu sắc</label>
-        <input type="text" name="mausac[]" placeholder="VD: Đỏ, Xanh, Đen...">
-        <label>Số lượng</label>
-        <input type="number" name="soluong[]" min="0" placeholder="VD: 10">
+                <label>Bảng size:</label>
+                <div id="sizeInputsContainer">
+                    </div>
+                <button type="button" id="addSizeBtn">Thêm Size</button>
 
-      `;
+                <button type="submit">Thêm sản phẩm</button>
+            </form>
 
-      container.appendChild(newSizeBlock);
-    }
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const addSizeBtn = document.getElementById('addSizeBtn');
+                    const sizeInputsContainer = document.getElementById('sizeInputsContainer');
+                    const addProductForm = document.getElementById('addProductForm');
+                    let sizeCount = 0;
 
-    function removeSize(button) {
-      const sizeSection = document.getElementById("size-section");
-      const sizeBlocks = sizeSection.querySelectorAll(".size-block");
+                    addSizeBtn.addEventListener('click', () => {
+                        sizeCount++;
+                        const sizeInputDiv = document.createElement('div');
+                        sizeInputDiv.classList.add('size-input');
+                        sizeInputDiv.innerHTML = `
+                            <input type="text" name="bangsize[${sizeCount}][size]" placeholder="Size">
+                            <input type="text" name="bangsize[${sizeCount}][mausac]" placeholder="Màu sắc">
+                            <input type="number" name="bangsize[${sizeCount}][soluong]" placeholder="Số lượng">
+                            <button type="button" class="removeSizeBtn">Xóa</button>
+                        `;
+                        sizeInputsContainer.appendChild(sizeInputDiv);
 
-      if (sizeBlocks.length <= 1) {
-        alert("Không thể xóa khi chưa tạo bảng");
-        return;
-      }
-      sizeSection.removeChild(sizeBlocks[sizeBlocks.length - 1]);
-}
+                        const removeButtons = sizeInputsContainer.querySelectorAll('.removeSizeBtn');
+                        removeButtons.forEach(button => {
+                            button.addEventListener('click', (event) => {
+                                event.target.parentNode.remove();
+                            });
+                        });
+                    });
 
-  </script>
-
-  <script>
-    document.getElementById("productForm").addEventListener("submit", function (event) {
-      event.preventDefault();
-
-      const sizeBlocks = document.querySelectorAll(".size-block");
-      const bangsize = [];
-
-      sizeBlocks.forEach(block => {
-        const size = block.querySelector("input[name='size[]']").value.trim();
-        const mausac = block.querySelector("input[name='mausac[]']").value.trim();
-        const soluong = block.querySelector("input[name='soluong[]']").value.trim();
-
-
-        if (size && mausac && soluong) {
-          bangsize.push({ size, mausac, soluong });
-        }
-      });
-
-      const data = {
-        id: document.getElementById("maSanPham").value,
-        tensanpham: document.getElementById("tensanpham").value,
-        loaisanpham: document.getElementById("loaiSanPham").value,
-        thuonghieu: document.getElementById("thuonghieu").value,
-        giasanpham: document.getElementById("giasanpham").value,
-        khuyenmai: document.getElementById("khuyenmai").value,
-        mota: document.getElementById("mota").value,
-        hinhanh: document.getElementById("hinhanh").value,
-        bangsize: bangsize,
-      };
-
-      fetch("/themsanpham", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      })
+                    const categoryDropdown = document.getElementById('loaisanpham'); // ID phải khớp với ID trong HTML
+    fetch('/dssanpham') // Hoặc endpoint API riêng
         .then(response => response.json())
-        .then(data => {alert(data.message);
-          if (data.success) {
-            location.reload();
-          }
+        .then(data => {
+            const categorySet = new Set();
+            data.forEach(sp => {
+                if (sp.loaisanpham) categorySet.add(sp.loaisanpham);
+            });
+
+            categorySet.forEach(loai => {
+                const option = document.createElement('option');
+                option.value = loai;
+                option.textContent = loai;
+                categoryDropdown.appendChild(option);
+            });
         })
-        .catch(error => {
-          console.error(error);
-          alert("Đã xảy ra lỗi, vui lòng thử lại sau");
-        });
-        
-    });
-  </script>
+        .catch(error => console.error('Lỗi khi lấy danh sách loại sản phẩm:', error));
 
+                    
+
+                    addProductForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
+                        const formData = new FormData(addProductForm);
+
+                        try {
+                            const response = await fetch('/them', {
+                                method: 'POST',
+                                body: formData,
+                            });
+
+                            const result = await response.json();
+                            alert(result.message);
+                            if (response.ok) {
+                                addProductForm.reset();
+                                sizeInputsContainer.innerHTML = ''; // Xóa các input size sau khi thêm thành công
+                                sizeCount = 0;
+                            }
+                        } catch (error) {
+                            console.error('Lỗi khi thêm sản phẩm:', error);
+                            alert('Đã có lỗi xảy ra khi thêm sản phẩm.');
+                        }
+                    });
+                });
+            </script>
+        </main>
+    </div>
 </body>
-
 </html>

@@ -81,40 +81,87 @@ app.get('/getSanPham/:id', async (req, res) => {
 });
 
 // API thêm sản phẩm mới
-app.post('/themsanpham', upload.single('hinhanh'), async (req, res) => {
-  const { id, tensanpham, loaisanpham, thuonghieu, giasanpham, khuyenmai, mota, bangsize } = req.body;
-  const hinhanh = req.file ? req.file.filename : null;
-
-  if (!id || !tensanpham || !loaisanpham || !thuonghieu || !giasanpham || !khuyenmai || !mota || !Array.isArray(bangsize) || bangsize.length === 0 || !hinhanh) {
-    return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin!" });
+const getProductCode = (loaisanpham) => {
+  switch (loaisanpham) {
+      case 'Áo bóng đá':
+          return 'AOBD';
+      case 'Dụng cụ thể thao':
+          return 'DCTT';
+      case 'Giày':
+          return 'GIAY';
+      default:
+          return 'SPKHAC'; // Mã mặc định cho loại sản phẩm khác
   }
+};
+
+const generateProductId = async (loaisanpham, db) => {
+  const productCode = getProductCode(loaisanpham);
+    try {
+        const counter = await db.collection('counters').findOneAndUpdate(
+            { _id: productCode },
+            { $inc: { seq: 1 } },
+            { upsert: true, returnDocument: 'after' }
+        );
+        const nextCounter = counter.seq.toString().padStart(4, '0');
+        return `${productCode}${nextCounter}`;
+    } catch (error) {
+        console.error("Lỗi khi tạo ID:", error);
+        return null; // Hoặc một giá trị mặc định/xử lý lỗi khác
+    }
+};
+
+// API thêm sản phẩm mới
+app.post('/them', upload.single('hinhanh'), async (req, res) => {
+  console.log("Dữ liệu nhận được từ frontend:", req.body);
+  const { tensanpham, loaisanpham, thuonghieu, giasanpham, khuyenmai, mota, bangsize } = req.body;
+  const hinhanh = req.file ? req.file.filename : null;
+  let newId;
 
   try {
-    const collection = await connectDB();
+      await client.connect(); // Đảm bảo kết nối MongoDB trước khi sử dụng
+      const db = client.db(dbName);
+      newId = await generateProductId(loaisanpham, db);
 
-    // Kiểm tra ID sản phẩm đã tồn tại chưa
-    const idExists = await collection.findOne({ id: id });
-    if (idExists) {
-      return res.status(409).json({ message: `ID sản phẩm "${id}" đã tồn tại.` });
-    }
+      if (!newId) {
+          return res.status(500).json({ message: 'Lỗi khi tạo ID sản phẩm.' });
+      }
 
-    const newProduct = {
-      id,
-      tensanpham,
-      loaisanpham,
-      thuonghieu,
-      giasanpham,
-      khuyenmai,
-      mota,
-      hinhanh,
-      bangsize,
-    };
+      let parsedBangSize = [];
+      if (bangsize) {
+          if (Array.isArray(bangsize)) {
+              parsedBangSize = bangsize.map(item => ({ size: item.size, mausac: item.mausac, soluong: parseInt(item.soluong) }));
+          } else if (typeof bangsize === 'object' && bangsize !== null) {
+              parsedBangSize.push({ size: bangsize.size, mausac: bangsize.mausac, soluong: parseInt(bangsize.soluong) });
+          }
+      }
 
-    await collection.insertOne(newProduct);
-    res.json({ message: `Thêm sản phẩm ${newProduct.tensanpham} thành công!` });
+      const newProduct = {
+          id: newId,
+          tensanpham,
+          loaisanpham: loaisanpham,
+          thuonghieu,
+          giasanpham: parseInt(giasanpham),
+          khuyenmai,
+          hinhanh: hinhanh ? `/images/${hinhanh}` : '',
+          mota,
+          bangsize: parsedBangSize,
+          qna: [],
+          binhluan: []
+      };
+
+      const collection = db.collection(collectionName);
+      const result = await collection.insertOne(newProduct);
+      if (result.insertedId) {
+          res.status(201).json({ message: `Sản phẩm ${tensanpham} đã được thêm thành công với ID: ${newId}` });
+      } else {
+          res.status(500).json({ message: 'Lỗi khi thêm sản phẩm vào database.' });
+      }
   } catch (error) {
-    console.error('Lỗi khi thêm sản phẩm vào MongoDB:', error);
-    res.status(500).json({ message: "Lỗi hệ thống" });
+      console.error('Lỗi khi thêm sản phẩm:', error);
+      res.status(500).json({ message: 'Lỗi hệ thống' });
+  } finally {
+      // Không đóng client ở đây nếu bạn muốn tái sử dụng kết nối
+      // await client.close();
   }
 });
 

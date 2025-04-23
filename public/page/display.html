@@ -72,6 +72,19 @@
                     <option value="1000000-2000000">1.000.000đ - 2.000.000đ</option>
                     <option value="2000000+">Trên 2.000.000đ</option>
                   `;
+                  // Thêm dropdown loại sản phẩm vào label ở sidebar
+        const categorySidebarDropdown = document.getElementById('categorySidebarDropdown'); // ID phải khớp
+        categorySet.forEach(loai => {
+            const option = document.createElement('option');
+            option.value = loai;
+            option.textContent = loai;
+            categorySidebarDropdown.appendChild(option);
+        });
+
+        categorySidebarDropdown.addEventListener('change', (event) => {
+            const selectedCategory = event.target.value;
+            filterProductsByCategorySidebar(selectedCategory);
+        });
                 })    
               </script>
             <table id="SanPhamTable">
@@ -80,6 +93,7 @@
                     <th>Mã sản phẩm</th>
                     <th>Loại sản phẩm</th>
                     <th>Tên sản phẩm</th>
+                    <th>Thương hiệu</th>
                     <th>Khuyến mãi</th>
                     <th>Giá</th>
                     <th>Ảnh</th>
@@ -88,6 +102,7 @@
                 </thead>
                 <tbody id="productList"></tbody>
               </table>
+              <div id="pagination" style="margin-top: 20px; text-align: center;"></div>
               <button id="deleteAllBtn" style="margin-top: 20px; background-color: red; color: white; border: none; padding: 10px; cursor: pointer;">
                 Xóa tất cả sản phẩm
             </button>
@@ -119,10 +134,11 @@
                     row.insertCell(0).textContent = sanpham.id;
                     row.insertCell(1).textContent = sanpham.loaisanpham;
                     row.insertCell(2).textContent = sanpham.tensanpham;
-                    row.insertCell(3).textContent = sanpham.khuyenmai;
-                    row.insertCell(4).textContent = sanpham.giasanpham.toLocaleString('vi-VN') + ' VND';
+                    row.insertCell(3).textContent = sanpham.thuonghieu;
+                    row.insertCell(4).textContent = sanpham.khuyenmai;
+                    row.insertCell(5).textContent = sanpham.giasanpham.toLocaleString('vi-VN') + ' VND';
                     
-                    const cellImage = row.insertCell(5);
+                    const cellImage = row.insertCell(6);
                     const img = document.createElement('img');
                     img.src = `/images/${sanpham.hinhanh}`;
                     img.style.width = '100px';
@@ -130,7 +146,7 @@
                     cellImage.appendChild(img);
                     
                     // Thêm cột hành động cho nút Sửa và nút Xóa
-                    const cellActions = row.insertCell(6);
+                    const cellActions = row.insertCell(7);
                     
                     // Nút Sửa
                     const editLink = document.createElement('a');
